@@ -3,7 +3,8 @@
 import pygame as pg
 from pygame.sprite import Sprite
 from settingsSS import *
-import random
+import random 
+from os import path
 
 vec = pg.math.Vector2
 
@@ -116,37 +117,35 @@ class Mob(Sprite):
         self.game = game
         self.groups = game.all_sprites, game.all_mobs 
         Sprite.__init__(self, self.groups)
-        self.image = pg.Surface((32, 32))
+        self.image = pg.Surface((32, 32))  # Default size of the MOB
         self.rect = self.image.get_rect()
-        self.image.fill(GREEN)
+        self.image.fill(GREEN)  # Default color for the MOB
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
-        self.speed = 0
-        self.category = random.choice([0,1])
-    def update(self):
-     
-        # moving towards the side of the screen
-        self.rect.x += self.speed
-        
-        hits = pg.sprite.spritecollide(self, self.game.all_walls, False)
-        # when it hits the side of the screen, it will move down
-        if hits:
-            # print("off the screen...")
-            self.speed *= -1
-            self.rect.y += 32
-        if self.rect.right > WIDTH or self.rect.left < 0:
-            # print("off the screen...")
-            self.speed *= -1
-            self.rect.y += 32
-        # elif self.rect.colliderect(self.game.player):
-        #     self.speed *= -1
-        # elif self.rect.colliderect(self):
-        #     self.speed *= -1
+        self.speed = random.choice([-2, 2])  # Initial random horizontal speed
+        self.category = random.choice([0, 1])  # Category for future use
 
-   
-        # then it will move towards the other side of the screen
-        # if it gets to the bottom, then it move to the top of the screen
-        # (display logic in the terminal)
+    def update(self):
+        # Move MOB horizontally
+        self.rect.x += self.speed
+
+        # Check for collisions with walls
+        hits = pg.sprite.spritecollide(self, self.game.all_walls, False)
+        if hits or self.rect.right > WIDTH or self.rect.left < 0:
+            # Reverse direction when hitting a wall or screen edge
+            self.speed *= 4
+            self.rect.y += 32  # Move down when changing direction
+
+        # Reset to the top if the mob reaches the bottom of the screen
+        if self.rect.bottom > HEIGHT:
+            self.reset_position()
+
+    def reset_position(self):
+        # Reset the MOB to the top of the screen
+        self.rect.y = 0
+        self.rect.x = random.randint(0, WIDTH - self.rect.width)  # Randomize horizontal position
+        self.speed = random.choice([-2, 2])  # Optionally reset speed
+
 
 class Wall(Sprite):
     def __init__(self, game, x, y):

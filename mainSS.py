@@ -100,6 +100,10 @@ class Game:
         # pg.quit()
         # process
     def update(self):
+        if self.player.lives == 0:
+            self.show_death_screen()
+            self.running = False
+            
         self.all_sprites.update()
         self.playing = False
         # output
@@ -118,7 +122,7 @@ class Game:
         pg.display.flip()
     def show_death_screen(self):
         self.screen.fill(RED)
-        self.draw_text(self.screen, "Wasted!", 42, WHITE, WIDTH/2, HEIGHT/2)
+        self.draw_text(self.screen, "You're Trash!", 42, WHITE, WIDTH/2, HEIGHT/2)
         pg.display.flip()
         self.wait_for_key()
     def wait_for_key(self):
@@ -131,6 +135,23 @@ class Game:
                     self.quit()
                 if event.type == pg.KEYUP:
                     waiting = False
+
+def show_death_screen(self):
+        self.screen.fill(RED)
+        self.draw_text(self.screen, "You Died!", 42, WHITE, WIDTH/2, HEIGHT/2)
+        pg.display.flip()
+        self.wait_for_key()
+ 
+def wait_for_key(self):
+    waiting = True
+    while waiting:
+        self.clock.tick(FPS)
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                waiting = False
+                self.quit()
+            if event.type == pg.KEYUP:
+                waiting = False
 
 # checks file name and creates a game object
 if __name__ == "__main__":
