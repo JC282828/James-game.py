@@ -5,8 +5,18 @@ from pygame.sprite import Sprite
 from settingsSS import *
 import random 
 from os import path
+import time
 
 vec = pg.math.Vector2
+
+
+class Game:
+    def __init__(self):
+        self.highscore = 0  # Initialize the highscore attribute
+def update_highscore(self, score):
+    if score > self.highscore:
+        self.highscore = score
+
 
 class Player(Sprite):
     def __init__(self, game, x, y):
@@ -73,7 +83,7 @@ class Player(Sprite):
                     print("why are they getting faster?!")
                 print("I've gotten a powerup!")       
             if str(hits[0].__class__.__name__) == "Fake Powerup":
-                self.speed -= 90
+                self.speed -= 70
                 print("oof that hurt")
             if str(hits[0].__class__.__name__) == "Mob":
                 self.lives -= 1
@@ -133,7 +143,7 @@ class Mob(Sprite):
         hits = pg.sprite.spritecollide(self, self.game.all_walls, False)
         if hits or self.rect.right > WIDTH or self.rect.left < 0:
             # Reverse direction when hitting a wall or screen edge
-            self.speed *= 4
+            self.speed *= -1
             self.rect.y += 32  # Move down when changing direction
 
         # Reset to the top if the mob reaches the bottom of the screen
@@ -193,3 +203,17 @@ class FakePowerup(Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
+
+class Game:
+    def __init__(self):
+        self.start_time = time.time()  # Game start time
+        self.score = 0
+        self.player_is_dead = False
+    def check_player_death(self):
+        if self.player_is_dead:
+            self.score = time.time() - self.start_time
+    def draw_score(self):
+        self.draw_text(self.screen, "Score: " + str(round(self.score, 2)), 24, BLACK, 96, 32)
+
+
+

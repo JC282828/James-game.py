@@ -8,6 +8,7 @@ from tilemap import *
 from os import path
 from random import randint
 import sys
+from utils import *
 '''
 GOALS: Survive for as long as possible
 RULES: Get powerups to speed up and avoid the mobs but watch out for fakepowerups!
@@ -40,8 +41,21 @@ class Game:
         pg.display.set_caption("James' Game")
         self.clock = pg.time.Clock()
         self.running = True
+        self.score = 0
     # create player block, creates the all_sprites group so that we can batch update and render, defines properties that can be seen in the game system
     #
+    def load_data(self):
+        self.game_folder = path.dirname(__file__)
+        # with open(path.join(self.game_folder, HS_FILE), 'w') as f:
+        #     f.write(str(0))
+        try:
+            with open(path.join(self.game_folder, HS_FILE), 'r') as f:
+                self.highscore = int(f.read())
+        except:
+            self.highscore = 0
+            with open(path.join(self.game_folder, HS_FILE), 'w') as f:
+                f.write(str(self.highscore))
+   
     def load_data(self):
         self.game_folder = path.dirname(__file__)
         self.map = Map(path.join(self.game_folder, 'level2.txt'))
@@ -95,6 +109,9 @@ class Game:
     def events(self):
         for event in pg.event.get():
                 if event.type == pg.QUIT:
+                    if self.score > self.highscore:
+                        with open(path.join(self.game_folder, HS_FILE), 'w') as f:
+                            f.write(str(self.score))
                     self.running = False
 
         # pg.quit()
@@ -103,10 +120,33 @@ class Game:
         if self.player.lives == 0:
             self.show_death_screen()
             self.running = False
+            self.timer.ticking()
+        # what to do when the player runs out of lives
+        if self.player.lives == 0:
+            if self.score > self.highscore:
+                    with open(path.join(self.game_folder, HS_FILE), 'w') as f:
+                      f.write(str(self.score))
+            self.show_death_screen()
+            self.running = False
+ 
+        if self.score >= 300 and not self.extra_life_spawned:
+            self.spawn_life_powerup(WIDTH//2, 0)
+            self.extra_life_spawned = True
             
         self.all_sprites.update()
         self.playing = False
         # output
+    
+    def show_start_screen(self):
+        self.load_data()
+        if not self.running:
+            return
+        self.screen.fill(BLACK)
+        self.draw_text(self.screen, "Welcome! ", 48, WHITE, WIDTH / 2, HEIGHT / 4)
+        self.draw_text(self.screen, "Best time: " + str(self.best_time), 22, WHITE, WIDTH / 2, HEIGHT / 2)
+        self.draw_text(self.screen, "Press a key to play again", 22, WHITE, WIDTH / 2, HEIGHT * 3 / 4)
+        pg.display.flip()
+        self.wait_for_key()
     def draw_text(self, surface, text, size, color, x, y):
         font_name = pg.font.match_font('arial')
         font = pg.font.Font(font_name, size)
@@ -119,6 +159,8 @@ class Game:
         self.all_sprites.draw(self.screen)
         self.draw_text(self.screen, str(pg.time.get_ticks()), 24, WHITE, WIDTH/30, HEIGHT/30)
         self.draw_text(self.screen, "lives:" + str(self.player.lives) , 24, WHITE, WIDTH -32, HEIGHT -32)
+        self.draw_text(self.screen, "Score:" + str(self.score), 24, BLACK, 96, 32)
+        #self.draw_text(self.screen, "Highscore:" + str(self.highscore), 24, BLACK, WIDTH/2, 32)
         pg.display.flip()
     def show_death_screen(self):
         self.screen.fill(RED)
@@ -143,15 +185,15 @@ def show_death_screen(self):
         self.wait_for_key()
  
 def wait_for_key(self):
-    waiting = True
-    while waiting:
-        self.clock.tick(FPS)
-        for event in pg.event.get():
-            if event.type == pg.QUIT:
-                waiting = False
-                self.quit()
-            if event.type == pg.KEYUP:
-                waiting = False
+        waiting = True
+        while waiting:
+            self.clock.tick(FPS)
+            for event in pg.event.get():
+                if event.type == pg.QUIT:
+                    waiting = False
+                    self.running = False
+                if event.type == pg.KEYUP:
+                    waiting = False
 
 # checks file name and creates a game object
 if __name__ == "__main__":
